@@ -84,6 +84,7 @@ public class DA_BYZ_Main{
 	public static boolean checkFaultyProcess(String currentProcessName, List<String> faultyProcess){
 		for (String p : faultyProcess){
 			if (p.equals(currentProcessName))
+				System.out.println(currentProcessName+" Process is faulty");
 				return true;
 		}
 		return false;
