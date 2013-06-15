@@ -1,132 +1,87 @@
 package main.java;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 public class DA_BYZ_Main{
-	public static String getIp() {
-
-		try {
-			InetAddress IP = InetAddress.getLocalHost();
-			String ipString = IP.getHostAddress();
-			System.out.println("IP of my system is := " + ipString);
-			return ipString;
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return null;
-
-	}
-
-	public static List<String> getProcessListFromProperties() {
-
-		String neighboursString = getPropertyByName("processes");
-		String[] neighbourArray = neighboursString.split(";");
-		List<String> neighbourList = Arrays.asList(neighbourArray);
- 
-    	return neighbourList;
-	}
-
-	public static List<String> getFaultyProcessListFromProperties() {
-
-		String faultyProcess = getPropertyByName("processFaulty");
-		String[] faultyArray = faultyProcess.split(";");
-		List<String> faultyList = Arrays.asList(faultyArray);
- 
-    	return faultyList;
+	public static int noOftraitors;
+	public static int processes;
+	public static List<String> traitorList;
+	
+	public static int getTraitors(){
+		return noOftraitors;
 	}
 	
-	public static String getPropertyByName(String name) {
-		Properties prop = new Properties();
-
-		try {
-			// load a properties file
-			prop.load(new FileInputStream("config.properties"));
-
-			// get the property value and print it out
-
-			String result = prop.getProperty(name);
-
-			return result;
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-
-		return null;
-	}
-
-	public static List<String> removeFromTheList(List<String> list, String element) {
-
-		int indexToRemove = list.indexOf(element);
-		ArrayList<String> filteredList = new ArrayList<String>();
-	    for (int i = 0; i < list.size(); i++) {
-	    	if (i != indexToRemove) {
-	    		filteredList.add(list.get(i));
-	        }  
-		}
-
-	    return filteredList;
-
-	}
-	public static boolean checkFaultyProcess(String currentProcessName, List<String> faultyProcess){
-		for (String p : faultyProcess){
-			if (p.equals(currentProcessName))
-				System.out.println(currentProcessName+" Process is faulty");
-				return true;
-		}
-		return false;
+	public static ArrayList<DA_BYZ> createByzantines(int noOfProcesses, int noOfTraitors, List<String> tList) throws RemoteException {
+		String namePrefix = "//127.0.0.1/Process";		
+		ArrayList<DA_BYZ> byzantineList = new ArrayList<DA_BYZ>();
 		
+		for (int i = 1; i <= noOfProcesses; i++) {
+			
+			String name = namePrefix + Integer.toString(i);	
+			DA_BYZ byzantineServer = new DA_BYZ(i, name, noOfProcesses, noOfTraitors, tList);
+			bindComponentToTheName(name, byzantineServer);
+			
+			byzantineList.add(byzantineServer);
+			
+
+		}
+
+		return byzantineList;
 	}
 
-	public static void main(String[] args) throws RemoteException {
-		boolean isFaulty = false;
-		System.setSecurityManager(new RMISecurityManager());
-		try{
-			int id = Integer.parseInt(args[0]);
-			int portNum = Integer.parseInt(args[1]);
+	public static void bindComponentToTheName(String bindName, DA_BYZ process) {
 	
-			try {
-				LocateRegistry.createRegistry(portNum);
+		try {
+			Naming.rebind(bindName, process);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			// IP address of the system
-			String ipAddress = getIp();
-			List<String> processList = getProcessListFromProperties();
-	
-			List<String> faultyProcesses = getFaultyProcessListFromProperties();
-	
-			String processName = getPropertyByName("processName");
-			String bindName = "/" + processName + id;
-			String currentProcessName = "//" + ipAddress + bindName;	
-			System.out.println("Current process name is " + currentProcessName);
-			// Returns true if current process is faulty
-			isFaulty = checkFaultyProcess(currentProcessName, faultyProcesses);
-	
-			DA_BYZ byz = new DA_BYZ(id, currentProcessName, processList, faultyProcesses, isFaulty);
-			Naming.rebind(bindName, byz);
-			// Broadcast messages
-			byz.startAlgo();
-		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
+		System.out.printf("bind to the name %s \n", bindName);
 		
+	
+	}
+
+	
+	public static void runAll(ArrayList<DA_BYZ> byzantines) {
+		for (DA_BYZ byz : byzantines) {
+			Thread thread = new Thread(byz);
+			thread.start();
+		}
+	}
+
+
+	public static void main(String args[]){
+		
+		
+		processes = Integer.parseInt(args[0]);
+		noOftraitors = Integer.parseInt(args[1]);
+		String traitors = args[2];
+		traitorList = Arrays.asList(traitors.split(","));
+		
+		try {
+			LocateRegistry.createRegistry(1099);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			runAll(createByzantines(processes, noOftraitors, traitorList));
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }

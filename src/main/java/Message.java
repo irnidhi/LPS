@@ -12,10 +12,10 @@ public class Message implements Serializable{
 	private int count;
 	private String sender;
 	private String receiver;
-	private OrderValue val;
+	private int val;
 	private List<Integer> path;
 	
-	public Message(int count, OrderValue order, String sender, String receiver){
+	public Message(int count, int order, String sender, String receiver){
 		this.setCount(count);
 		this.setSender(sender);
 		this.setReceiver(receiver);
@@ -39,11 +39,11 @@ public class Message implements Serializable{
 		this.count = count;
 	}
 
-	public OrderValue getVal() {
+	public int getVal() {
 		return val;
 	}
 
-	public void setVal(OrderValue val) {
+	public void setVal(int val) {
 		this.val = val;
 	}
 

@@ -14,6 +14,5 @@ public interface DA_BYZ_RMI extends java.rmi.Remote{
 			NotBoundException;
 
 	void recvAckMsg(AckMessage m) throws RemoteException;
-	void broadcast(OrderValue order) throws RemoteException;
-	
+
 }

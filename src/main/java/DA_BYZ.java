@@ -14,8 +14,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
-	//private static Log log = LogFactory.getLog(DA_BYZ.class);
+public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
+	private static Log log = LogFactory.getLog(DA_BYZ.class);
 	private int pId;
 	private String currProcess;
 	private List<String> processList;
@@ -36,16 +36,16 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
 	private ProcessState pState;
 	private static final int WAIT_TIME = 1000;
 	
-	protected DA_BYZ(int pId, String currentProcessName, List<String> processList, List<String> faultyProcesses, boolean faulty) throws RemoteException {
+	protected DA_BYZ(int pId, String processName, int noOfProcesses, int noOfTraitors, List<String> tList) throws RemoteException {
 		super();
 		this.pId = pId;
-		this.currProcess = currentProcessName;
-		this.processList = processList;
-		this.noOfProcesses = processList.size();
-		this.faultyProcessList = faultyProcesses;
-		this.noOfFaulty = faultyProcesses.size();
-		this.rounds = faultyProcesses.size() + 1;
-		this.isFaulty = faulty;
+		this.currProcess = processName;
+		//this.processList = processList;
+		this.noOfProcesses = noOfProcesses;
+		this.faultyProcessList = tList;
+		this.noOfFaulty = faultyProcessList.size();
+		this.rounds = faultyProcessList.size() + 1;
+		//this.isFaulty = faulty;
 		// By default General is the first process.
 		if (pId == 1){
 			this.isGeneral = true;
@@ -59,8 +59,9 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
 		// if RETIRED do not broadcast.
 		// Set order value to be broadcasted based on fault pattern, if the process is Faulty
 		
-		OrderValue order = OrderValue.RETREAT;			//order value hard-coded
+		int order = 0;			//order value hard-coded
 		System.out.println("order value of "+pId+"is"+order);
+		log.debug(pState);
 		System.out.println("No. of rounds:"+rounds);
 		for (int r=0; r<rounds; r++){
 			if (r == 0 && pId == 1){
@@ -68,6 +69,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
 				break;
 			}
 			System.out.println(pState);
+			log.debug(pState);
 			if (pState.name() == "WAITING"){
 				try {
 				    //thread to sleep for the specified number of milliseconds
@@ -157,7 +159,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
 	  * This function broadcasts messages to all the other running lieutenant processes in case of General or broadcasts to other
 	  * lieutenants in case of a sender lieutenant
      */	
-	public void broadcast(OrderValue order) {
+	public void broadcast(int order) {
 		
 		System.out.print("Inside broadcast");
 		
@@ -191,6 +193,12 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI{
 			}
 			
 		}
+		
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		
 	}	
 }
