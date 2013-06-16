@@ -12,15 +12,28 @@ public class Message implements Serializable{
 	private int count;
 	private String sender;
 	private String receiver;
-	private int val;
+	private String val;
 	private List<Integer> path;
 	
-	public Message(int count, int order, String sender, String receiver){
+	public Message(int count,String order, String sender, String receiver){
 		this.setCount(count);
 		this.setSender(sender);
 		this.setReceiver(receiver);
 		this.setVal(order);
 		this.setPath(new LinkedList<Integer>());
+	}
+	
+	public Message(int count, String order, String sender, String receiver, String path){
+		this.setCount(count);
+		this.setSender(sender);
+		this.setReceiver(receiver);
+		this.setVal(order);
+		this.setPath(new LinkedList<Integer>());
+		
+		for (int i = 0; i < path.length(); i++) {
+			char c = path.charAt(i);
+			this.path.add(Character.getNumericValue(c));
+		}
 	}
 
 	public List<Integer> getPath() {
@@ -39,12 +52,12 @@ public class Message implements Serializable{
 		this.count = count;
 	}
 
-	public int getVal() {
+	public String getVal() {
 		return val;
 	}
 
-	public void setVal(int val) {
-		this.val = val;
+	public void setVal(String order) {
+		this.val = order;
 	}
 
 	public String getSender() {
