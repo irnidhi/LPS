@@ -9,22 +9,19 @@ public class Message implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int count;
 	private String sender;
 	private String receiver;
 	private int val;
 	private List<Integer> path;
 	
-	public Message(int count, int order, String sender, String receiver){
-		this.setCount(count);
+	public Message(int order, String sender, String receiver){
 		this.setSender(sender);
 		this.setReceiver(receiver);
 		this.setVal(order);
 		this.setPath(new LinkedList<Integer>());
 	}
 	
-	public Message(int count, int order, String sender, String receiver, String path){
-		this.setCount(count);
+	public Message(int order, String sender, String receiver, String path){
 		this.setSender(sender);
 		this.setReceiver(receiver);
 		this.setVal(order);
@@ -36,20 +33,24 @@ public class Message implements Serializable{
 		}
 	}
 
+	public static Message getDefaultMessage(int missingNode, List<Integer> pathAbove)
+	{
+		StringBuilder pathString = new StringBuilder();
+		for (Integer pathInt : pathAbove) {
+			pathString.append(pathInt);
+		}
+		pathString.append(missingNode);
+		String pathStringReady = pathString.toString();
+		Message defaultMessage = new  Message(1, "x", "x", pathStringReady);
+		
+		return defaultMessage;
+	}
 	public List<Integer> getPath() {
 		return path;
 	}
 
 	public void setPath(List<Integer> path) {
 		this.path = path;
-	}
-
-	public int getCount() {
-		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
 	}
 
 	public int getVal() {
