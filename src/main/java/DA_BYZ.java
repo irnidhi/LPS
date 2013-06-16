@@ -11,11 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
 
 public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
-	private static Log log = LogFactory.getLog(DA_BYZ.class);
+//	private static Log log = LogFactory.getLog(DA_BYZ.class);
 	private int pId;
 	private String currProcess;
 	private List<String> processList;
@@ -61,7 +61,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 		
 		int order = 0;			//order value hard-coded
 		System.out.println("order value of "+pId+"is"+order);
-		log.debug(pState);
+		//log.debug(pState);
 		System.out.println("No. of rounds:"+rounds);
 		for (int r=0; r<rounds; r++){
 			if (r == 0 && pId == 1){
@@ -69,7 +69,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 				break;
 			}
 			System.out.println(pState);
-			log.debug(pState);
+			//log.debug(pState);
 			if (pState.name() == "WAITING"){
 				try {
 				    //thread to sleep for the specified number of milliseconds

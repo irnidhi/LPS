@@ -22,6 +22,19 @@ public class Message implements Serializable{
 		this.setVal(order);
 		this.setPath(new LinkedList<Integer>());
 	}
+	
+	public Message(int count, int order, String sender, String receiver, String path){
+		this.setCount(count);
+		this.setSender(sender);
+		this.setReceiver(receiver);
+		this.setVal(order);
+		this.setPath(new LinkedList<Integer>());
+		
+		for (int i = 0; i < path.length(); i++) {
+			char c = path.charAt(i);
+			this.path.add(Character.getNumericValue(c));
+		}
+	}
 
 	public List<Integer> getPath() {
 		return path;

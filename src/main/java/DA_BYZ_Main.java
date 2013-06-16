@@ -63,25 +63,44 @@ public class DA_BYZ_Main{
 
 	public static void main(String args[]){
 		
+		messageTest();
+//		processes = Integer.parseInt(args[0]);
+//		noOftraitors = Integer.parseInt(args[1]);
+//		String traitors = args[2];
+//		traitorList = Arrays.asList(traitors.split(","));
+//		
+//		try {
+//			LocateRegistry.createRegistry(1099);
+//		} catch (RemoteException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		try {
+//			runAll(createByzantines(processes, noOftraitors, traitorList));
+//		} catch (RemoteException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
-		processes = Integer.parseInt(args[0]);
-		noOftraitors = Integer.parseInt(args[1]);
-		String traitors = args[2];
-		traitorList = Arrays.asList(traitors.split(","));
+	}
+
+	private static void messageTest() {
 		
-		try {
-			LocateRegistry.createRegistry(1099);
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Message m1 = new Message(0, 1, "x", "x", "0");
+		Message m2 = new Message(0, 1, "x", "x", "01");
+		Message m3 = new Message(0, 1, "x", "x", "012");
+		Message m4 = new Message(0, 1, "x", "x", "013");
+		Message m5 = new Message(0, 1, "x", "x", "02");
+		Message m6 = new Message(0, 1, "x", "x", "031");
 		
-		try {
-			runAll(createByzantines(processes, noOftraitors, traitorList));
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
+		Node root = new Node();
+		root.saveMessage(m1, 1);
+		root.saveMessage(m2, 1);
+		root.saveMessage(m3, 1);
+		root.saveMessage(m4, 1);
+		root.saveMessage(m5, 1);
+		root.saveMessage(m6, 1);
 	}
 }
