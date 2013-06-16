@@ -87,29 +87,59 @@ public class DA_BYZ_Main{
 
 	private static void messageTest() {
 		
-		Message m1 = new Message(0, "0", "x", "x", "1");
-		Message m2 = new Message(0, "0", "x", "x", "12");
-		Message m3 = new Message(0, "0", "x", "x", "13");
-		Message m4 = new Message(0, "1", "x", "x", "14");
-		Message m5 = new Message(0, "X", "x", "x", "123");
-		Message m6 = new Message(0, "X", "x", "x", "124");
-		//Message m7 = new Message(0, "1", "x", "x", "125");
-		//Message m8 = new Message(0, "1", "x", "x", "126");
-		//Message m5 = new Message(0, "1", "x", "x", "02");
-		//Message m6 = new Message(0, "0", "x", "x", "031");
+//		Message m1 = new Message(0, "0", "x", "x", "1");
+//		Message m2 = new Message(0, "0", "x", "x", "12");
+//		Message m3 = new Message(0, "0", "x", "x", "13");
+//		Message m4 = new Message(0, "1", "x", "x", "14");
+//		Message m5 = new Message(0, "X", "x", "x", "123");
+//		Message m6 = new Message(0, "X", "x", "x", "124");
+//		//Message m7 = new Message(0, "1", "x", "x", "125");
+//		//Message m8 = new Message(0, "1", "x", "x", "126");
+//		//Message m5 = new Message(0, "1", "x", "x", "02");
+//		//Message m6 = new Message(0, "0", "x", "x", "031");
+//		
+//		// levels should start from 0
+//		Node root = new Node();
+//		root.saveMessage(m1, 1);
+//		root.saveMessage(m2, 1);
+//		root.saveMessage(m3, 1);
+//		root.saveMessage(m4, 1);
+//		root.saveMessage(m5, 1);
+//		root.saveMessage(m6, 1);
+//		//root.saveMessage(m7, 2);
+//		//root.saveMessage(m8, 2);
+//		//root.saveMessage(m5, 1);
+//		//root.saveMessage(m6, 1);
 		
-		// levels should start from 0
-		Node root = new Node();
+		
+		//Majority calculation function
+//		root.majority(root);
+		
+		Message m1 = new Message("1", "x", "x", "1");
+		Message m2 = new Message("1", "x", "x", "15");
+		Message m3 = new Message("1", "x", "x", "12");
+		Message m33 = new Message("1", "x", "x", "14");
+		Message m34 = new Message("1", "x", "x", "152");
+		Message m4 = new Message("1", "x", "x", "154");
+//		Message m5 = new Message(1, "x", "x", "02");
+//		Message m6 = new Message(1, "x", "x", "021");
+//		Message m7 = new Message(1, "x", "x", "022");
+		
+		
+		Node root = new Node(6);
 		root.saveMessage(m1, 1);
 		root.saveMessage(m2, 1);
 		root.saveMessage(m3, 1);
+		root.saveMessage(m33, 1);
+//		root.saveMessage(m5, 1);
+//		root.saveMessage(m6, 1);
+//		root.saveMessage(m7, 1);
+		
+		root.saveMessage(m34, 1);
 		root.saveMessage(m4, 1);
-		root.saveMessage(m5, 1);
-		root.saveMessage(m6, 1);
-		//root.saveMessage(m7, 2);
-		//root.saveMessage(m8, 2);
-		//root.saveMessage(m5, 1);
-		//root.saveMessage(m6, 1);
-		root.majority(root);
+		root.fillLevelWithDefaultValues(1, 3);
+		root.fillLevelWithDefaultValues(2, 3);
+		List<Node> nodes = root.getNodesFromLevel(3);
+//		root.majority(root);
 	}
 }
