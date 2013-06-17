@@ -84,7 +84,7 @@ public class DA_BYZ_Main{
 		}				
 		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
 
-		runAll(createByzantines(5, OutputSettings.noOfFaultyProcesses));
+		runAll(createByzantines(10, OutputSettings.noOfFaultyProcesses));
 
 	}
 	
@@ -211,7 +211,7 @@ public class DA_BYZ_Main{
 		}
 		else if (failureMode.contains("RAND")) {
 			OutputSettings.failedSendMsgs = true;
-			OutputSettings.randomSending = true;
+			OutputSettings.randomSending = false;
 			OutputSettings.randomValue = true;
 		}
 		else

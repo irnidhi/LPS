@@ -80,9 +80,12 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			processMessagesReceivedInCurrentRound();
 			if (this.pId != 1)
 			{
-				root.fillLevelWithDefaultValues(currentRound+1, this.pId);
+				//root.fillLevelWithDefaultValues(currentRound+1, this.pId);
 			}
 			
+			
+			List<Message> messagesReceivedCurrentRound = messagesReceived.get(currentRound);
+			//System.out.println("Proc " + pId + " msg rec " + messagesReceivedCurrentRound.size());
 			currentRound++;
 			//System.out.println("Next round N " + this.pId + " R " + currentRound);
 			//pauseProg();
@@ -90,27 +93,37 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 				broadcast();
 		}
 		
-		//root.majority(root);
+		root.majority(root);
 		
-		root.majority2(noOfTraitors+1);
+		//root.majority2(noOfTraitors+1);
+		
 		
 		System.out.println("RESULT: " + root.getOutput() + " Finish N " + this.pId + " R " + currentRound);
 	}
 	
 	
 	public void processMessagesReceivedInCurrentRound() {
-		List<Message> messagesReceivedCurrentRound = messagesReceived.get(currentRound);
+		synchronized(messagesReceived) {
+			List<Message> messagesReceivedCurrentRound = messagesReceived.get(currentRound);
 		for (Message message : messagesReceivedCurrentRound) {
 			root.saveMessage(message, 0);
 		}
+		}
+		
 	}
 	
 	public synchronized String receive(Message msg) throws RemoteException {	
-		System.out.println("Process " + this.pId + " received " + msg);
+		//System.out.println("Process " + this.pId + " received " + msg);
 		int messageRound = msg.getPath().size() - 1;
+		if (messageRound != this.currentRound) {
+			//System.out.println("Message " + msg + " coming in round " + this.currentRound);
+		}
 		List<Message> messagesReceivedCurrentRound = messagesReceived.get(messageRound);
 		messagesReceivedCurrentRound.add(msg);
-		messagesReceived.set(messageRound, messagesReceivedCurrentRound);
+		synchronized(messagesReceived) {
+			messagesReceived.set(messageRound, messagesReceivedCurrentRound);
+		}
+		
 		return null;
 	}
 	
@@ -126,7 +139,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			
 			DA_BYZ_RMI processserver = (DA_BYZ_RMI) robj;
 			
-			//System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
+			//System.out.println("Order msg " + msg);
 			//put the message in sending queue, removed only when ack is received
 
 			processserver.receive(msg);
@@ -156,7 +169,16 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			for (String destProcess : processList){
 				List<Integer> path = new LinkedList<Integer>();
 				path.add(pId);
-				Message msg = new Message("0", this.currProcess, destProcess, path);
+				Message msg = new Message("1", this.currProcess, destProcess, path);
+				double random = Math.random();
+				if (random < 0.5)
+				{
+					msg.setVal("1");
+				}
+				else
+				{
+					msg.setVal("0");
+				}
 				messagesToSend.add(msg);
 			}
 		}
@@ -173,7 +195,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 						
 						Message msgToSend = new Message(message.getVal(), this.currProcess, destProcess, newPath);
 						
-						if (this.pId > noOfProcesses-OutputSettings.noOfFaultyProcesses) 
+						if (this.pId > noOfProcesses-OutputSettings.noOfFaultyProcesses+1) 
 						{
 							//System.out.println("Faulty");
 							if (OutputSettings.randomValue)
@@ -181,16 +203,16 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 								double random = Math.random();
 								if (random < 0.5)
 								{
-									msgToSend.setVal("0");
+									msgToSend.setVal("1");
 								}
 								else
 								{
-									msgToSend.setVal("1");
+									msgToSend.setVal("0");
 								}
 							}
 							else
 							{
-								msgToSend.setVal("1");
+								msgToSend.setVal("0");
 							}
 							
 							if (OutputSettings.failedSendMsgs)

@@ -43,7 +43,7 @@ public class Node{
 		this.level = 0;
 		this.parent = null;
 		this.children = new HashMap<Integer, Node>();
-		this.input = ZERO;
+		this.input = ONE;
 		this.output = UNKNOWN;
 		this.path = new LinkedList<Integer>();
 		
@@ -58,7 +58,7 @@ public class Node{
 		this.parent = parent;
 		this.children = new HashMap<Integer, Node>();
 
-		this.input = ZERO;
+		this.input = ONE;
 		this.output = UNKNOWN;
 		
 		this.isSaved = false;
@@ -170,6 +170,7 @@ public class Node{
 			
 			for (int i = 1; i <= numberOfProcesses; i++) {
 				if (!idsToExclude.contains(i)){
+					System.out.println("Filling default values");
 					Message defaultMessage = Message.getDefaultMessage(i, node.path);
 					
 					 if (!node.children.containsKey(i))
@@ -199,13 +200,13 @@ public class Node{
 
 		}
 		int max = Math.max(oneCounter, zeroCounter);
-		// if there is a tie always ONE will be returned
-		if (max == oneCounter)
-			return ONE;
+		// if there is a tie always ZERO will be returned
 		if (max == zeroCounter)
 			return ZERO;
-		else 
+		if (max == oneCounter)
 			return ONE;
+		else 
+			return ZERO;
 			
 	}
 	
@@ -222,7 +223,7 @@ public class Node{
 			for (Node node : levelNodes) {
 				inputValues.add(node.input);
 				for (Node child : node.children.values()) {
-					inputValues.add(child.input);
+					inputValues.add(child.output);
 				}
 				node.output = findMajorityValue(inputValues);
 			}
@@ -234,12 +235,13 @@ public class Node{
 		List<String> childrenOutputValues = new LinkedList<String>();
 		Node currNode = root;
 		currNode.output = currNode.input;
+		childrenOutputValues.add(currNode.output);
 		//System.out.println("value at node"+currNode.getPath()+"\ninput"+ root.input+ "output:"+root.output);
 		
 		if (!currNode.getChildren().isEmpty()){
 			for (Node value : currNode.getChildren().values()) {
 					//value.output = value.input;
-					majority(value);
+					value.majority(value);
 			}
 			for (Node value2 :currNode.getChildren().values()){
 				childrenOutputValues.add(value2.getOutput());
