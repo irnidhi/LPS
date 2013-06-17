@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
+import com.sun.xml.internal.ws.api.message.Messages;
 
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
@@ -75,11 +78,14 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			}
 			
 			processMessagesReceivedInCurrentRound();
-			//root.fillLevelWithDefaultValues(currentRound+1, this.pId);
+			if (this.pId != 1)
+			{
+				root.fillLevelWithDefaultValues(currentRound+1, this.pId);
+			}
 			
 			currentRound++;
-			System.out.println("Next round N " + this.pId + " R " + currentRound);
-			
+			//System.out.println("Next round N " + this.pId + " R " + currentRound);
+			//pauseProg();
 			if (currentRound <= noOfTraitors)
 				broadcast();
 		}
@@ -120,7 +126,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			
 			DA_BYZ_RMI processserver = (DA_BYZ_RMI) robj;
 			
-			System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
+			//System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
 			//put the message in sending queue, removed only when ack is received
 
 			processserver.receive(msg);
@@ -167,10 +173,50 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 						
 						Message msgToSend = new Message(message.getVal(), this.currProcess, destProcess, newPath);
 						
-						if (this.pId == 3) {
-							msgToSend.setVal("1");
+						if (this.pId > noOfProcesses-OutputSettings.noOfFaultyProcesses) 
+						{
+							//System.out.println("Faulty");
+							if (OutputSettings.randomValue)
+							{
+								double random = Math.random();
+								if (random < 0.5)
+								{
+									msgToSend.setVal("0");
+								}
+								else
+								{
+									msgToSend.setVal("1");
+								}
+							}
+							else
+							{
+								msgToSend.setVal("1");
+							}
+							
+							if (OutputSettings.failedSendMsgs)
+								if (OutputSettings.randomSending)
+								{
+									
+									
+									double random = Math.random();
+									if (random < 0.5)
+									{
+										messagesToSend.add(msgToSend);
+									}
+								}
+								else
+								{
+									messagesToSend.add(msgToSend);
+								}
+							
+							
+							
 						}
-						messagesToSend.add(msgToSend);
+						else
+						{
+							messagesToSend.add(msgToSend);
+						}
+						
 					}
 					
 				}
@@ -184,6 +230,25 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 		
 	}
 	
+	public void pauseProg() {
+		System.out.printf(">>NODE %d ROUND: %d\n", this.pId, this.currentRound);
+		List<Message> msgSendInPrvRound = messagesToSend
+				.get(this.currentRound - 1);
+		System.out.printf("Messages sent in previous round:\n"
+				+ msgSendInPrvRound.toString() +"\n");
+		List<Message> msgRcvdInPrvRound = messagesReceived
+				.get(this.currentRound - 1);
+		System.out.printf("Messages received in previous round:\n"
+				+ msgRcvdInPrvRound.toString() +"\n");
+
+		if (OutputSettings.stepExecution) {
+			System.out.println("Press enter to continue...");
+			Scanner keyboard = new Scanner(System.in);
+			keyboard.nextLine();
+		}
+
+	}
+
 	@Override
 	public void run() {
 		startAlgo();

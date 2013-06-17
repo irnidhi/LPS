@@ -84,7 +84,7 @@ public class DA_BYZ_Main{
 		}				
 		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
 
-		runAll(createByzantines(4, 1));
+		runAll(createByzantines(5, OutputSettings.noOfFaultyProcesses));
 
 	}
 	
@@ -136,7 +136,6 @@ public class DA_BYZ_Main{
 		String processName = getPropertyByName("processName");
 		
 		List<String> processesList = getProcessListFromProperties("processes");
-		List<String> traitorList = getProcessListFromProperties("processFaulty");
 		
 		try {
 			LocateRegistry.createRegistry(portNum);
@@ -155,7 +154,7 @@ public class DA_BYZ_Main{
 		
 		DA_BYZ byzantineServer = null;
 		try {
-			byzantineServer = new DA_BYZ(id, currentProcessName, otherProcesses, processesList.size(), traitorList.size());
+			byzantineServer = new DA_BYZ(id, currentProcessName, otherProcesses, processesList.size(), OutputSettings.noOfFaultyProcesses);
 		} catch (RemoteException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -200,6 +199,29 @@ public class DA_BYZ_Main{
 			OutputSettings.stepExecution = false;
 		}
 		
+		String failureMode = getPropertyByName("faultType");
+		
+		if (failureMode.contains("SILENT")) {
+			OutputSettings.failedSendMsgs = false;
+		}
+		else if (failureMode.contains("RAND_SILENT")) {
+			OutputSettings.failedSendMsgs = true;
+			OutputSettings.randomSending = true;
+			OutputSettings.randomValue = false;
+		}
+		else if (failureMode.contains("RAND")) {
+			OutputSettings.failedSendMsgs = true;
+			OutputSettings.randomSending = true;
+			OutputSettings.randomValue = true;
+		}
+		else
+		{
+			OutputSettings.failedSendMsgs = true;
+			OutputSettings.randomSending = false;
+			OutputSettings.randomValue = false;
+		}
+		String noOfFaultyProcessesString = getPropertyByName("noOfFaultyProcesses");
+		OutputSettings.noOfFaultyProcesses = Integer.parseInt(noOfFaultyProcessesString);
 		
 		if (mode.contains("LOCAL")) {
 			

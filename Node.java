@@ -17,7 +17,7 @@ public class Node{
 	public static final String ONE = "1";
 	public static final String ZERO = "0";
 	public static final String UNKNOWN = "?";
-	public static final String FAULTY = "X";
+
 	public static final String DEFAULT = "1";
 	
 	private Integer id; 
@@ -190,23 +190,20 @@ public class Node{
 	public String findMajorityValue(List<String> outputList){
 		int oneCounter = 0;
 		int zeroCounter = 0;
-		int faultyCounter = 0;
+
 		for (String value: outputList){
 			if (value.equals(ONE))
 				oneCounter++;
 			else if (value.equals(ZERO))
 				zeroCounter++;
-			else if (value.equals(FAULTY))
-				faultyCounter++;
+
 		}
-		int max = Math.max(oneCounter, Math.max(zeroCounter, faultyCounter));
+		int max = Math.max(oneCounter, zeroCounter);
 		// if there is a tie always ONE will be returned
 		if (max == oneCounter)
 			return ONE;
 		if (max == zeroCounter)
 			return ZERO;
-		if (max == faultyCounter)
-			return FAULTY;
 		else 
 			return ONE;
 			
