@@ -84,7 +84,7 @@ public class DA_BYZ_Main{
 		}				
 		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
 
-		runAll(createByzantines(10, OutputSettings.noOfFaultyProcesses));
+		runAll(createByzantines(6, OutputSettings.noOfFaultyProcesses));
 
 	}
 	
