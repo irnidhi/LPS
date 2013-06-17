@@ -9,28 +9,36 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DA_BYZ_Main{
-	public static int noOftraitors;
-	public static int processes;
-	public static List<String> traitorList;
+
 	
-	public static int getTraitors(){
-		return noOftraitors;
-	}
-	
-	public static ArrayList<DA_BYZ> createByzantines(int noOfProcesses, int noOfTraitors, List<String> tList) throws RemoteException {
+	public static ArrayList<DA_BYZ> createByzantines(int noOfProcesses, int noOfTraitors) {
 		String namePrefix = "//127.0.0.1/Process";		
 		ArrayList<DA_BYZ> byzantineList = new ArrayList<DA_BYZ>();
 		
+		ArrayList<String> processNames = new ArrayList<String>();
+		
 		for (int i = 1; i <= noOfProcesses; i++) {
+			String name = namePrefix + Integer.toString(i);
+			processNames.add(name);
+		}
+		
+		int i = 1;
+		for (String name : processNames) {
 			
-			String name = namePrefix + Integer.toString(i);	
-			DA_BYZ byzantineServer = new DA_BYZ(i, name, noOfProcesses, noOfTraitors, tList);
-			bindComponentToTheName(name, byzantineServer);
-			
+			try {
+			ArrayList<String> otherProcesses = new ArrayList<String>(processNames);
+			otherProcesses.remove(name);
+			DA_BYZ byzantineServer = new DA_BYZ(i++, name, otherProcesses, noOfProcesses, noOfTraitors);
 			byzantineList.add(byzantineServer);
 			
-
+			bindComponentToTheName(name, byzantineServer);
+			
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+
 
 		return byzantineList;
 	}
@@ -55,15 +63,30 @@ public class DA_BYZ_Main{
 	
 	public static void runAll(ArrayList<DA_BYZ> byzantines) {
 		for (DA_BYZ byz : byzantines) {
-			Thread thread = new Thread(byz);
+			Thread thread = new Thread(byz, "Process " + byz.pId);
 			thread.start();
 		}
+	}
+	
+	public static void goLocal() {
+		try {
+			LocateRegistry.createRegistry(1099);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}				
+		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
+
+		runAll(createByzantines(9, 3));
+		
+		
 	}
 
 
 	public static void main(String args[]){
+		goLocal();
+		//messageTest();
 		
-		messageTest();
 //		processes = Integer.parseInt(args[0]);
 //		noOftraitors = Integer.parseInt(args[1]);
 //		String traitors = args[2];
@@ -140,6 +163,6 @@ public class DA_BYZ_Main{
 		root.fillLevelWithDefaultValues(1, 3);
 		root.fillLevelWithDefaultValues(2, 3);
 		List<Node> nodes = root.getNodesFromLevel(3);
-//		root.majority(root);
+		root.majority(root);
 	}
 }

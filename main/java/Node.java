@@ -100,7 +100,7 @@ public class Node{
 		 }
 		 else
 		 {
-			 int nextNodeIndex = msgPath.get(level);
+			 int nextNodeIndex = msgPath.get(level+1);
 			 if (!children.containsKey(nextNodeIndex))
 			 {
 				 System.out.println("Error adding msg");
@@ -215,7 +215,7 @@ public class Node{
 		List<String> childrenOutputValues = new LinkedList<String>();
 		Node currNode = root;
 		currNode.output = currNode.input;
-		System.out.println("value at node"+currNode.getPath()+"\ninput"+ root.input+ "output:"+root.output);
+		//System.out.println("value at node"+currNode.getPath()+"\ninput"+ root.input+ "output:"+root.output);
 		
 		if (!currNode.getChildren().isEmpty()){
 			for (Node value : currNode.getChildren().values()) {
@@ -226,7 +226,7 @@ public class Node{
 				childrenOutputValues.add(value2.getOutput());
 			}
 			currNode.setOutput(findMajorityValue(childrenOutputValues));
-			System.out.println("decide output at "+currNode.getLevel()+"is "+currNode.getOutput());
+			//System.out.println("decide output at "+currNode.getLevel()+"is "+currNode.getOutput());
 		}
 //		for (Node value : children.values()) {
 //			

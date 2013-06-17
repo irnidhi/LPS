@@ -42,6 +42,17 @@ public class Message implements Serializable{
 			char c = path.charAt(i);
 			this.path.add(Character.getNumericValue(c));
 		}
+
+//		if (path.contains(".")) {
+//			String[] pathList = path.split(".");
+//			for (String string : pathList) {
+//				this.path.add(Integer.parseInt(string));
+//			}
+//		}
+//		else {
+//			this.path.add(Integer.parseInt(path));
+//		}
+		
 	}
 
 	public static Message getDefaultMessage(int missingNode, List<Integer> pathAbove)
@@ -56,8 +67,22 @@ public class Message implements Serializable{
 		
 		return defaultMessage;
 	}
+	
+	public String toString( ) {
+        return "S " + sender + " R " + receiver + " V " + val + " P " + path.toString();
+    }
+	
 	public List<Integer> getPath() {
 		return path;
+	}
+	
+	public String getStringPath() {
+		StringBuilder stringPath = new StringBuilder();
+		for (Integer node : this.path) {
+			stringPath.append(node);
+			//stringPath.append('.');
+		}
+		return stringPath.toString();
 	}
 
 	public void setPath(List<Integer> path) {

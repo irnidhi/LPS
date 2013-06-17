@@ -6,6 +6,7 @@ import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,55 +17,92 @@ import java.util.Map;
 
 public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 //	private static Log log = LogFactory.getLog(DA_BYZ.class);
-	private int pId;
+	public int pId;
 	private String currProcess;
 	private List<String> processList;
 
-	private int rounds;
+	private int noOfProcesses;
+	private int noOfTraitors;
 
+	private Node root;
+	private int currentRound;
+	
 	private static final int WAIT_TIME = 1000;
 	
-	protected DA_BYZ(int pId, String processName, int noOfProcesses, int noOfTraitors, List<String> tList) throws RemoteException {
+	private List<List<Message>> messagesToSend;
+	private List<List<Message>> messagesReceived;
+	
+	
+	protected DA_BYZ(int pId, String processName, List<String> processList, int noOfProcesses, int noOfTraitors) throws RemoteException {
 		super();
 		this.pId = pId;
 		this.currProcess = processName;
-
+		this.processList = processList;
+		
+		this.noOfProcesses = noOfProcesses;
+		this.noOfTraitors = noOfTraitors;
+		
+		this.root = new Node(this.noOfProcesses);
+		currentRound = 0;
+		
+		
+		messagesToSend = new ArrayList<List<Message>>();
+		for (int i = 0; i < noOfTraitors + 1; i++) {
+			List<Message> sendRound = new ArrayList<Message>();
+			messagesToSend.add(sendRound);
+		}
+		
+		messagesReceived = new ArrayList<List<Message>>();
+		for (int i = 0; i < noOfTraitors + 1; i++) {
+			List<Message> receiveRound = new ArrayList<Message>();
+			messagesReceived.add(receiveRound);
+		}
 	}
 	
 	public void startAlgo(){
+		System.out.println("Start of node " + this.pId);
+		if (pId == 1){
+			broadcast();
+		}
 		
-		String order = "0";			//order value hard-coded
-		System.out.println("order value of "+pId+"is"+order);
-		//log.debug(pState);
-		System.out.println("No. of rounds:"+rounds);
-		for (int r=0; r<rounds; r++){
-			if (r == 0 && pId == 1){
-				broadcast(order);
-				break;
+		while (currentRound < noOfTraitors + 1)
+		{
+			try {
+				Thread.sleep(WAIT_TIME);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			//System.out.println(pState);
-			//log.debug(pState);
-			//if (pState.name() == "WAITING"){
-				try {
-				    //thread to sleep for the specified number of milliseconds
-				    Thread.sleep(WAIT_TIME);
-				    
-				} catch ( java.lang.InterruptedException ie) {
-				    System.out.println(ie);
-			}
-			//if (pState.name() == "SAFE"){
-				System.out.println("process is safe, calling broadcast for process:" +pId);
-				broadcast(order);
-			}
+			
+			processMessagesReceivedInCurrentRound();
+			//root.fillLevelWithDefaultValues(currentRound+1, this.pId);
+			
+			currentRound++;
+			//System.out.println("Next round N " + this.pId + " R " + currentRound);
+			
+			if (currentRound <= noOfTraitors)
+				broadcast();
+		}
+		
+		root.majority(root);
+		
+		System.out.println("RESULT: " + root.getOutput() + " Finish N " + this.pId + " R " + currentRound);
 	}
 	
 	
-
+	public void processMessagesReceivedInCurrentRound() {
+		List<Message> messagesReceivedCurrentRound = messagesReceived.get(currentRound);
+		for (Message message : messagesReceivedCurrentRound) {
+			root.saveMessage(message, 0);
+		}
+	}
 	
-	public synchronized String receive(Message m) throws RemoteException {
-		
-		
-	
+	public synchronized String receive(Message msg) throws RemoteException {	
+		System.out.println("Process " + this.pId + " received " + msg);
+		int messageRound = msg.getPath().size() - 1;
+		List<Message> messagesReceivedCurrentRound = messagesReceived.get(messageRound);
+		messagesReceivedCurrentRound.add(msg);
+		messagesReceived.set(messageRound, messagesReceivedCurrentRound);
 		return null;
 	}
 	
@@ -79,7 +117,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			
 			DA_BYZ_RMI processserver = (DA_BYZ_RMI) robj;
 			
-			System.out.println("Order msg sent from "+currProcess+"to"+lieutenant);
+			//System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
 			//put the message in sending queue, removed only when ack is received
 
 			processserver.receive(msg);
@@ -93,21 +131,55 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 	  * This function broadcasts messages to all the other running lieutenant processes in case of General or broadcasts to other
 	  * lieutenants in case of a sender lieutenant
      */	
-	public void broadcast(String order) {
-		
-		System.out.print("Inside broadcast");
-		
+	public void broadcast() {
 
-		for (String destProcess : processList){
-
-			
+		List<Message> messagesToSendInCurrentRound = generateMessagesToSend();
+		for (Message message : messagesToSendInCurrentRound) {
+			sendMsg(message.getReceiver(), message);
 		}
-		
+		this.messagesToSend.set(currentRound, messagesToSendInCurrentRound);		
 	}
 
+	public List<Message> generateMessagesToSend() {
+		List<Message> messagesToSend = new ArrayList<Message>();
+		
+		if (currentRound == 0) {
+			for (String destProcess : processList){
+				Message msg = new Message("0", this.currProcess, destProcess, Integer.toString(pId));
+				messagesToSend.add(msg);
+			}
+		}
+		else {
+			List<Message> messagesReceivedPreviousRound = messagesReceived.get(currentRound-1);
+			for (Message message : messagesReceivedPreviousRound) {
+				for (String destProcess : processList){
+					String destProcessNumber = destProcess.split("Process")[1];
+					String oldPath = message.getStringPath();
+					if (!oldPath.contains(destProcessNumber))
+					{
+						String newPath = oldPath + Integer.toString(pId);
+						
+						Message msgToSend = new Message(message.getVal(), this.currProcess, destProcess, newPath);
+						
+						if (this.pId < 5) {
+							msgToSend.setVal("1");
+						}
+						messagesToSend.add(msgToSend);
+					}
+					
+				}
+//				String newPath = message.getStringPath() + Integer.toString(pId);
+//				Message msgToSend = new Message(message.getVal(), this.currProcess, message.getReceiver(), newPath);
+//				messagesToSend.add(msgToSend);
+			}
+		}
+		
+		return messagesToSend;
+		
+	}
+	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		startAlgo();
 	}	
 }
