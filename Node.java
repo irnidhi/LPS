@@ -1,4 +1,4 @@
-package main.java;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class Node{
 	private int numberOfProcesses;
 	
 	public String toString( ) {
-        return "Node " + id.toString() + " level " + level.toString() + " path " + path.toString() + "\n";
+        return "Node " + id.toString() + " level " + level.toString() + " path " + path.toString() + " i " + input + " o " + output + "\n";
     }
 	
 	public Node(int numberOfProcesses) {
@@ -210,6 +210,28 @@ public class Node{
 		else 
 			return ONE;
 			
+	}
+	
+	public void majority2(int numberOfLevels) {
+		List<Node> leafNodes = getNodesFromLevel(numberOfLevels-1);
+		
+		for (Node node : leafNodes) {
+			node.output = node.input;
+		}
+		
+		for (int i = numberOfLevels-1; i > 0; i--) {
+			List<Node> levelNodes = getNodesFromLevel(i-1);
+			List<String> inputValues = new LinkedList<String>();
+			for (Node node : levelNodes) {
+				inputValues.add(node.input);
+				for (Node child : node.children.values()) {
+					inputValues.add(child.input);
+				}
+				node.output = findMajorityValue(inputValues);
+			}
+
+		}
+		
 	}
 	public void majority(Node root){
 		List<String> childrenOutputValues = new LinkedList<String>();

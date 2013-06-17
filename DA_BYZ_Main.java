@@ -1,4 +1,4 @@
-package main.java;
+
 
 
 import java.io.FileInputStream;
@@ -84,7 +84,7 @@ public class DA_BYZ_Main{
 		}				
 		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
 
-		runAll(createByzantines(8, 2));
+		runAll(createByzantines(4, 1));
 
 	}
 	
@@ -151,11 +151,11 @@ public class DA_BYZ_Main{
 		System.out.println("Current process name is " + currentProcessName);
 		
 		ArrayList<String> otherProcesses = new ArrayList<String>(processesList);
-		otherProcesses.remove(bindName);
+		otherProcesses.remove(currentProcessName);
 		
 		DA_BYZ byzantineServer = null;
 		try {
-			byzantineServer = new DA_BYZ(id, bindName, otherProcesses, processesList.size(), traitorList.size());
+			byzantineServer = new DA_BYZ(id, currentProcessName, otherProcesses, processesList.size(), traitorList.size());
 		} catch (RemoteException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -175,7 +175,7 @@ public class DA_BYZ_Main{
 		System.out.printf("bind to the name %s \n", bindName);
 		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,4 +1,4 @@
-package main.java;
+
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -84,7 +84,9 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 				broadcast();
 		}
 		
-		root.majority(root);
+		//root.majority(root);
+		
+		root.majority2(noOfTraitors+1);
 		
 		System.out.println("RESULT: " + root.getOutput() + " Finish N " + this.pId + " R " + currentRound);
 	}
@@ -113,7 +115,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 	 */
 	public void sendMsg(String lieutenant, Message msg) {
 		try {
-			System.out.println("lookup");
+			//System.out.println("lookup");
 			Remote robj = Naming.lookup(lieutenant);
 			
 			DA_BYZ_RMI processserver = (DA_BYZ_RMI) robj;
@@ -124,7 +126,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			processserver.receive(msg);
 			
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.out.println(e);
 		}
 	}
 	
@@ -165,7 +167,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 						
 						Message msgToSend = new Message(message.getVal(), this.currProcess, destProcess, newPath);
 						
-						if (this.pId < 5) {
+						if (this.pId == 3) {
 							msgToSend.setVal("1");
 						}
 						messagesToSend.add(msgToSend);
