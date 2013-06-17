@@ -1,12 +1,19 @@
 package main.java;
 
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.rmi.Naming;
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class DA_BYZ_Main{
 
@@ -77,14 +84,134 @@ public class DA_BYZ_Main{
 		}				
 		System.out.printf("registry started at ip %s and port number %d\n", "127.0.0.1", 1099);
 
-		runAll(createByzantines(9, 3));
+		runAll(createByzantines(8, 2));
+
+	}
+	
+	public static String getIp() {
 		
+		try {
+			InetAddress IP = InetAddress.getLocalHost();
+			String ipString = IP.getHostAddress();
+			System.out.println("IP of my system is := " + ipString);
+			return ipString;
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String getPropertyByName(String name) {
+		Properties prop = new Properties();
+
+		try {
+			// load a properties file
+			prop.load(new FileInputStream("config.properties"));
+
+			// get the property value and print it out
+
+			String result = prop.getProperty(name);
+
+			return result;
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static List<String> getProcessListFromProperties(String propertyName) {
+
+		String neighboursString = getPropertyByName(propertyName);
+		String[] neighbourArray = neighboursString.split(";");
+		List<String> neighbourList = Arrays.asList(neighbourArray);
+ 
+    	return neighbourList;
+	}
+	
+	public static void goGlobal(int id, int portNum) {
+		String ipAddress = getIp();
+		String processName = getPropertyByName("processName");
+		
+		List<String> processesList = getProcessListFromProperties("processes");
+		List<String> traitorList = getProcessListFromProperties("processFaulty");
+		
+		try {
+			LocateRegistry.createRegistry(portNum);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}				
+		//System.out.printf("registry started at ip %s and port number %d\n", ipAddress, portNum);
+			
+		String bindName = "/" + processName + id;
+		String currentProcessName = "//" + ipAddress + bindName;	
+		System.out.println("Current process name is " + currentProcessName);
+		
+		ArrayList<String> otherProcesses = new ArrayList<String>(processesList);
+		otherProcesses.remove(bindName);
+		
+		DA_BYZ byzantineServer = null;
+		try {
+			byzantineServer = new DA_BYZ(id, bindName, otherProcesses, processesList.size(), traitorList.size());
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		try {
+			Naming.rebind(bindName, byzantineServer);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.printf("bind to the name %s \n", bindName);
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Thread thread = new Thread(byzantineServer);
+		thread.run();
 		
 	}
 
-
 	public static void main(String args[]){
-		goLocal();
+		System.setSecurityManager(new RMISecurityManager());
+		
+		String mode = getPropertyByName("mode");
+		
+		String runMode = getPropertyByName("run");
+		
+		if (runMode.contains("STEP")) {
+			OutputSettings.stepExecution = true;
+		}
+		else {
+			OutputSettings.stepExecution = false;
+		}
+		
+		
+		if (mode.contains("LOCAL")) {
+			
+			System.out.println("Go local");
+			goLocal();
+		}
+		else {
+			int id = Integer.parseInt(args[0]);
+			int portNum = Integer.parseInt(args[1]);
+			goGlobal(id, portNum);
+			
+		}
 		//messageTest();
 		
 //		processes = Integer.parseInt(args[0]);
@@ -138,12 +265,12 @@ public class DA_BYZ_Main{
 		//Majority calculation function
 //		root.majority(root);
 		
-		Message m1 = new Message("1", "x", "x", "1");
-		Message m2 = new Message("1", "x", "x", "15");
-		Message m3 = new Message("1", "x", "x", "12");
-		Message m33 = new Message("1", "x", "x", "14");
-		Message m34 = new Message("1", "x", "x", "152");
-		Message m4 = new Message("1", "x", "x", "154");
+		Message m1 = new Message("1", "x", "x", Arrays.asList(1));
+		Message m2 = new Message("1", "x", "x", Arrays.asList(1, 5));
+		Message m3 = new Message("1", "x", "x", Arrays.asList(1, 2));
+		Message m33 = new Message("1", "x", "x", Arrays.asList(1, 4));
+		Message m34 = new Message("1", "x", "x", Arrays.asList(1, 5, 2));
+		Message m4 = new Message("1", "x", "x", Arrays.asList(1, 5, 4));
 //		Message m5 = new Message(1, "x", "x", "02");
 //		Message m6 = new Message(1, "x", "x", "021");
 //		Message m7 = new Message(1, "x", "x", "022");

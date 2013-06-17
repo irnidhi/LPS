@@ -78,7 +78,7 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			//root.fillLevelWithDefaultValues(currentRound+1, this.pId);
 			
 			currentRound++;
-			//System.out.println("Next round N " + this.pId + " R " + currentRound);
+			System.out.println("Next round N " + this.pId + " R " + currentRound);
 			
 			if (currentRound <= noOfTraitors)
 				broadcast();
@@ -113,11 +113,12 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 	 */
 	public void sendMsg(String lieutenant, Message msg) {
 		try {
+			System.out.println("lookup");
 			Remote robj = Naming.lookup(lieutenant);
 			
 			DA_BYZ_RMI processserver = (DA_BYZ_RMI) robj;
 			
-			//System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
+			System.out.println("Order msg sent from "+currProcess+" to "+lieutenant);
 			//put the message in sending queue, removed only when ack is received
 
 			processserver.receive(msg);
@@ -145,7 +146,9 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 		
 		if (currentRound == 0) {
 			for (String destProcess : processList){
-				Message msg = new Message("0", this.currProcess, destProcess, Integer.toString(pId));
+				List<Integer> path = new LinkedList<Integer>();
+				path.add(pId);
+				Message msg = new Message("0", this.currProcess, destProcess, path);
 				messagesToSend.add(msg);
 			}
 		}
@@ -153,11 +156,12 @@ public class DA_BYZ extends UnicastRemoteObject implements DA_BYZ_RMI, Runnable{
 			List<Message> messagesReceivedPreviousRound = messagesReceived.get(currentRound-1);
 			for (Message message : messagesReceivedPreviousRound) {
 				for (String destProcess : processList){
-					String destProcessNumber = destProcess.split("Process")[1];
-					String oldPath = message.getStringPath();
+					int destProcessNumber = Integer.parseInt(destProcess.split("Process")[1]);
+					List<Integer> oldPath = message.getPath();
 					if (!oldPath.contains(destProcessNumber))
 					{
-						String newPath = oldPath + Integer.toString(pId);
+						List<Integer> newPath = new LinkedList<Integer>(oldPath);
+						newPath.add(pId);
 						
 						Message msgToSend = new Message(message.getVal(), this.currProcess, destProcess, newPath);
 						

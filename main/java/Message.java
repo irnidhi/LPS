@@ -31,39 +31,21 @@ public class Message implements Serializable{
 //		this.setCount(count);
 //	}
 
-	public Message(String order, String sender, String receiver, String path){
+	public Message(String order, String sender, String receiver, List<Integer> path){
 
 		this.setSender(sender);
 		this.setReceiver(receiver);
 		this.setVal(order);
-		this.setPath(new LinkedList<Integer>());
-		
-		for (int i = 0; i < path.length(); i++) {
-			char c = path.charAt(i);
-			this.path.add(Character.getNumericValue(c));
-		}
+		this.setPath(path);
 
-//		if (path.contains(".")) {
-//			String[] pathList = path.split(".");
-//			for (String string : pathList) {
-//				this.path.add(Integer.parseInt(string));
-//			}
-//		}
-//		else {
-//			this.path.add(Integer.parseInt(path));
-//		}
 		
 	}
 
 	public static Message getDefaultMessage(int missingNode, List<Integer> pathAbove)
 	{
-		StringBuilder pathString = new StringBuilder();
-		for (Integer pathInt : pathAbove) {
-			pathString.append(pathInt);
-		}
-		pathString.append(missingNode);
-		String pathStringReady = pathString.toString();
-		Message defaultMessage = new  Message("1", "x", "x", pathStringReady);
+		List<Integer> newPath = new LinkedList<Integer>(pathAbove);
+		newPath.add(missingNode);
+		Message defaultMessage = new  Message("1", "x", "x", newPath);
 		
 		return defaultMessage;
 	}
@@ -76,15 +58,6 @@ public class Message implements Serializable{
 		return path;
 	}
 	
-	public String getStringPath() {
-		StringBuilder stringPath = new StringBuilder();
-		for (Integer node : this.path) {
-			stringPath.append(node);
-			//stringPath.append('.');
-		}
-		return stringPath.toString();
-	}
-
 	public void setPath(List<Integer> path) {
 		this.path = path;
 	}
